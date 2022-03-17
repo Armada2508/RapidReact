@@ -16,8 +16,13 @@ import frc.robot.Constants.Rotation;
 import frc.robot.Lib.RotationalWinchUtil;
 import frc.robot.commands.AutoClimb;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cscore.VideoSink;
 import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cameraserver.CameraServerShared;
+import edu.wpi.first.cscore.CameraServerCvJNI;
+import edu.wpi.first.cscore.CameraServerJNI;
+import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.MjpegServer;
 
 public class RobotContainer {
@@ -38,7 +43,8 @@ public class RobotContainer {
         linearWinchSubsystem = new WinchSubsystem(Linear.leftID, Linear.rightID, Linear.max, Linear.min, Linear.linearController, false, Linear.gearboxRatio);
         rotationalWinchSubsystem = new WinchSubsystem(Rotation.leftID, Rotation.rightID, (RotationalWinchUtil.findRotationalWinchPos(135)), (RotationalWinchUtil.findRotationalWinchPos(75)), Rotation.rotationController, true, Rotation.gearboxRatio);
         //create and set default drive command
-        driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1), () -> joystick.getRawAxis(0), driveSubsystem)); 
+    
+        driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1)*-1, () -> joystick.getRawAxis(0), driveSubsystem)); 
         //create forward and backward rotational winch command
         new JoystickButton(joystick, 6).whileHeld(new WinchCommand(Rotation.power,  rotationalWinchSubsystem));
         new JoystickButton(joystick, 4).whileHeld(new WinchCommand(Rotation.power*-1, rotationalWinchSubsystem));
@@ -85,14 +91,40 @@ public class RobotContainer {
     
     
     public Command getAutoCommand(){
-        return new AutoDrive(.4, 36, driveSubsystem);
+        return new AutoDrive(.2, 36, driveSubsystem);
+    }
+
+    UsbCamera cam0; 
+    UsbCamera cam1;
+    VideoSink server;
+
+
+    public void switchCamera(int num){
+        if(num == 0){
+            server.setSource(cam0);
+        }
+        else{
+            server.setSource(cam1);
+        }
     }
 
     public void initCam() {
         
         // Get the back camera plugged into the RIO
-        UsbCamera topCamera = CameraServer.startAutomaticCapture(0);
-        topCamera.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+        //cam0 = CameraServer.startAutomaticCapture(0);
+        cam1 = CameraServer.startAutomaticCapture(1);
+        cam1.setResolution(160, 120);
+        //CameraServer.getServer().setSource(cam0);
+        CameraServer.addServer("s").setSource(cam1);
+
+        
+        //switchCamera(1);
+
+        //UsbCamera topCamera = CameraServer.startAutomaticCapture(0);
+        //topCamera.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+        //UsbCamera frontCamera = CameraServer.startAutomaticCapture(1);
+        //topCamera.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+
         // // Feed that back camera into a new stream so we can add compression
         // MjpegServer topCameraStream = new MjpegServer("Top Camera", 1185);
         // topCameraStream.setSource(topCamera);
@@ -104,8 +136,10 @@ public class RobotContainer {
         // topCameraStream.setFPS(Constants.Camera.kCameraFPS);
 
         // Get the back camera plugged into the RIO
-        UsbCamera frontCamera = CameraServer.startAutomaticCapture(1);
-        frontCamera.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+        //frontCamera.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+        //VideoSink server = CameraServer.getServer();
+       
+
         // // Feed that back camera into a new stream so we can add compression
         // MjpegServer frontCameraStream = new MjpegServer("Front Camera", 1186);
         // frontCameraStream.setSource(frontCamera);

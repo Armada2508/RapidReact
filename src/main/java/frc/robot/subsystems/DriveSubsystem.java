@@ -36,6 +36,8 @@ public class DriveSubsystem extends SubsystemBase{
         TalonFXLfollow = new WPI_TalonFX(Drive.LRID); 
         TalonFXR = new WPI_TalonFX(Drive.RFID); 
         TalonFXRfollow = new WPI_TalonFX(Drive.RRID);
+        TalonFXL.setInverted(true);
+        TalonFXLfollow.setInverted(true);
         TalonFXLfollow.follow(TalonFXL);
         TalonFXRfollow.follow(TalonFXR);
         left =  new MotorControllerGroup(TalonFXL, TalonFXLfollow);
@@ -50,7 +52,7 @@ public class DriveSubsystem extends SubsystemBase{
 
     public void setPower(double leftPower, double rightPower){
         left.set(leftPower);
-        right.set(rightPower*-1);
+        right.set(rightPower);
     }
     
     public double getRightPostition(){

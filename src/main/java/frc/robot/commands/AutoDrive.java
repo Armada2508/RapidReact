@@ -17,8 +17,8 @@ public class AutoDrive extends CommandBase{
         subsystem = driveSubsystem;
         subsystem.callibrate();
 
-        this.power = Math.abs(power);
-        this.distance = distance + subsystem.getRightPostition();
+        this.power = Math.abs(power);//it's backwards
+        this.distance = distance;
         
         addRequirements(subsystem);
     }
@@ -37,7 +37,10 @@ public class AutoDrive extends CommandBase{
   
     // Called every time the scheduler runs while the command is scheduled.
     @Override
-    public void execute() {}
+    public void execute() {
+        System.out.println(subsystem.getRightPostition());
+        System.out.println(distance);
+    }
   
     // Called once the command ends or is interrupted.
     @Override
