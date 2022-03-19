@@ -113,7 +113,7 @@ public class WinchCommand extends CommandBase{
     @Override
     public void end(boolean interrupted) {
         //lower arm goes to position of higher arm so they are even
-      
+        
         //even out sides so it doesn't start uneven next time? done 3/8 - check
         //find average power not origional power so you have closer initial power?
         subsystem.setPower(0, 0);

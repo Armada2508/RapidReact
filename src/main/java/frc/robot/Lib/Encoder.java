@@ -12,7 +12,9 @@ public class Encoder {
     public static double toDistance(double sensorPosition, int encoderUnitsPerRev, double gearRatio, double wheelDiameter) {
         return ((double)sensorPosition / (double)(encoderUnitsPerRev * gearRatio)) * Math.PI * wheelDiameter;
     }
-    
+    //d = s*pi*w/(e*g)
+    //s = d*e*g/pi*w
+
     /**
      * Converts from real-world units to encoder units
      * @param distance The distance traveled
@@ -22,7 +24,7 @@ public class Encoder {
      * @return Distance in encoder units
      */
     public static double fromDistance(double distance, int encoderUnitsPerRev, double gearRatio, double wheelDiameter) {
-        return distance / ( Math.PI * wheelDiameter ) * (double)encoderUnitsPerRev * gearRatio;
+        return (distance / ( Math.PI * wheelDiameter )) * (double)encoderUnitsPerRev * gearRatio;
     }
 
 

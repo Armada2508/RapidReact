@@ -95,7 +95,8 @@ public class AutoClimb extends SequentialCommandGroup{
     public class getStatArmsOn extends SequentialCommandGroup{
         public getStatArmsOn(WinchSubsystem r, WinchSubsystem l){
             addCommands(
-                new WinchCommand(Linear.power, 0, l),
+                new WinchCommand(Linear.power, Linear.min, l),
+                new WinchCommand(Linear.power, Linear.min, l),
                 new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(93), r), //get stat arms on
                 //new WaitCommand(2),
                 new WinchCommand(Linear.power, 8, l),

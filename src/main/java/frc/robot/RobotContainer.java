@@ -41,9 +41,9 @@ public class RobotContainer {
 
         driveSubsystem = new DriveSubsystem();
         linearWinchSubsystem = new WinchSubsystem(Linear.leftID, Linear.rightID, Linear.max, Linear.min, Linear.linearController, false, Linear.gearboxRatio);
-        rotationalWinchSubsystem = new WinchSubsystem(Rotation.leftID, Rotation.rightID, (RotationalWinchUtil.findRotationalWinchPos(135)), (RotationalWinchUtil.findRotationalWinchPos(75)), Rotation.rotationController, true, Rotation.gearboxRatio);
+        rotationalWinchSubsystem = new WinchSubsystem(Rotation.leftID, Rotation.rightID, Rotation.max, Rotation.min, Rotation.rotationController, true, Rotation.gearboxRatio);
+        
         //create and set default drive command
-    
         driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1)*-1, () -> joystick.getRawAxis(0), driveSubsystem)); 
         //create forward and backward rotational winch command
         new JoystickButton(joystick, 6).whileHeld(new WinchCommand(Rotation.power,  rotationalWinchSubsystem));
@@ -65,8 +65,8 @@ public class RobotContainer {
 
         JoystickButton callibrateSwitch =  new JoystickButton(buttonBoard, 16);
 
-        new JoystickButton(buttonBoard, 3).whenPressed(new Callibrate(linearWinchSubsystem, () -> callibrateSwitch.get()));
-        new JoystickButton(buttonBoard, 4).whenPressed(new Callibrate(rotationalWinchSubsystem, () -> callibrateSwitch.get()));
+        new JoystickButton(buttonBoard, 3).whenPressed(new Callibrate(linearWinchSubsystem, 0, () -> callibrateSwitch.get()));
+        new JoystickButton(buttonBoard, 4).whenPressed(new Callibrate(rotationalWinchSubsystem, RotationalWinchUtil.findRotationalWinchPos(75), () -> callibrateSwitch.get()));
 
         
 
@@ -111,11 +111,11 @@ public class RobotContainer {
     public void initCam() {
         
         // Get the back camera plugged into the RIO
-        //cam0 = CameraServer.startAutomaticCapture(0);
-        cam1 = CameraServer.startAutomaticCapture(1);
-        cam1.setResolution(160, 120);
+        cam0 = CameraServer.startAutomaticCapture(0);
+        //cam1 = CameraServer.startAutomaticCapture(1);
+        //cam1.setResolution(160, 120);
         //CameraServer.getServer().setSource(cam0);
-        CameraServer.addServer("s").setSource(cam1);
+        //CameraServer.addServer("s").setSource(cam1);
 
         
         //switchCamera(1);

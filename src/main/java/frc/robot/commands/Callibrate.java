@@ -7,30 +7,29 @@ import frc.robot.subsystems.WinchSubsystem;
 public class Callibrate extends CommandBase {
     private WinchSubsystem subsystem;
     private BooleanSupplier b;
+    private double val;
 
     /**
      * sets current position to zero
      * @param subsystem
      */
-    public Callibrate (WinchSubsystem subsystem, BooleanSupplier b){
+    public Callibrate (WinchSubsystem subsystem, double val, BooleanSupplier b){
         this.b = b;
         this.subsystem = subsystem;
+        this.val = val;
 
     }
 
     @Override
     public void initialize() {
-        //had some error on 3/16
-        if(b.getAsBoolean()){
-            subsystem.callibrate();
-        }
+        
     }
   
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
         if(b.getAsBoolean()){
-            subsystem.callibrate();
+            subsystem.callibrate(val);
         }
     }
   

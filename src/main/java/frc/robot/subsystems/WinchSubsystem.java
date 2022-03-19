@@ -7,6 +7,8 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import frc.robot.Lib.Encoder;
 //import edu.wpi.first.wpilibj.PowerDistribution;
+import frc.robot.Lib.Encoder;
+import frc.robot.Lib.RotationalWinchUtil;
 
 import frc.robot.Constants.Winch;
 import edu.wpi.first.math.controller.PIDController;
@@ -65,9 +67,10 @@ public class WinchSubsystem extends SubsystemBase{
         return min;
     }
 
-    public void callibrate(){
-        left.setSelectedSensorPosition(0);
-        right.setSelectedSensorPosition(0);
+    public void callibrate(double val){
+        val = Encoder.fromDistance(val, Winch.encoderUnits, gearBoxRatio, Winch.diameter);
+        left.setSelectedSensorPosition(val);
+        right.setSelectedSensorPosition(val);
     }
 
 
