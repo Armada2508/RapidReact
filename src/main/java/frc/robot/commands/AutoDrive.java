@@ -12,7 +12,7 @@ public class AutoDrive extends CommandBase{
      * @param power power of motors
      * @param distance inches, positive foward, negative backwards
      * @param driveSubsystem
-     */ 
+     */
     public AutoDrive(double power, double distance, DriveSubsystem driveSubsystem){
         subsystem = driveSubsystem;
         subsystem.callibrate();
