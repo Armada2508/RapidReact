@@ -27,6 +27,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     robotContainer = new RobotContainer();
+    
   }
 
   /**
@@ -44,10 +45,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    System.out.println("Autonoumous init");
     Command auto = robotContainer.getAutoCommand();
     if (auto != null){
-      System.out.println("Scheduled");
       auto.schedule();
     }
   }

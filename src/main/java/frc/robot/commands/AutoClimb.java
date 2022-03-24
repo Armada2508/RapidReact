@@ -31,20 +31,24 @@ public class AutoClimb extends SequentialCommandGroup{
         r = rotation;
         addCommands(    
             new firstRung(rotation, linear),
-            new PrintCommand("first rung"),
+            //new PrintCommand("first rung"),
             //new WaitCommand(3),
             new nextRung(rotation, linear),
-            new PrintCommand("second rung"),
+            //new PrintCommand("second rung"),
             //new WaitCommand(3),
-            new nextRung(rotation, linear), 
+            new nextRung(rotation, linear),
+            new WinchCommand(.1, 0, linear)
             //new WaitCommand(3),
-            new PrintCommand("third rung")
-        ); 
-        
-       
+            //new PrintCommand("third rung")
+        );   
     }
+
     public Command getNextRung(){
         return new nextRung(r, l);
+    }
+
+    public Command getExtend(){
+        return new Extend(r, l);
     }
     /*since pendulums have constant period despite differing hieghts, 
     if we extend the arms in the correct place in the period each time
@@ -71,12 +75,21 @@ public class AutoClimb extends SequentialCommandGroup{
         return autoClimb;
     }
 
+    public class Extend extends ParallelCommandGroup{
+        public Extend(WinchSubsystem r, WinchSubsystem l){
+            addCommands(
+                new WinchCommand(Linear.power, 20, l),
+                new WinchCommand(Rotation.power,RotationalWinchUtil.findRotationalWinchPos(90), r)
+            );
+        }
+    }
+
     public class RetractAndLineUpStatArms extends SequentialCommandGroup{
         public RetractAndLineUpStatArms(WinchSubsystem r, WinchSubsystem l){
             addCommands(
                 new ParallelCommandGroup(
                     new WinchCommand(Linear.power, 6, l),
-                    new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(75), r)
+                    new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(72), r)
                 )
             );
         }
@@ -99,7 +112,7 @@ public class AutoClimb extends SequentialCommandGroup{
                 new WinchCommand(Linear.power, Linear.min, l),
                 new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(89), r), //get stat arms on
                 new WaitCommand(2.0),
-                new WinchCommand(Linear.power, 8, l)
+                new WinchCommand(Linear.power, 6, l)
             );
         }
     }
@@ -107,11 +120,11 @@ public class AutoClimb extends SequentialCommandGroup{
     public class angleExtendAndGetOnBar extends SequentialCommandGroup{
         public angleExtendAndGetOnBar(WinchSubsystem r, WinchSubsystem l){
             addCommands(
-                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(110), r),
+                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(120), r),
                 new WinchCommand(Linear.power, Linear.max, l),//extend all the way
-                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(100), r),//rotate so on bar
+                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(98), r),//rotate so on bar
                 new WaitCommand(.1),
-                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(100), r),//rotate so on bar
+                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(98), r),//rotate so on bar
                 new WinchCommand(Linear.power, 19, l) //retract a little so hook on
             );
         }

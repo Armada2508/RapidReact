@@ -33,7 +33,7 @@ public class Constants {
         public static final int leftID = 4; 
         public static final int rightID = 5; 
         public static final double power = .3;
-        public static final double max = 26.5;
+        public static final double max = 27;
         public static final double min = 0;                                 
         public static final PIDController linearController = new PIDController(.0002, .00001, .000020);
         public static final int gearboxRatio = 20;
@@ -54,7 +54,7 @@ public class Constants {
         public static final int gearboxRatio = 36;
 
         public static final double max = RotationalWinchUtil.findRotationalWinchPos(135);
-        public static final double min = RotationalWinchUtil.findRotationalWinchPos(75);
+        public static final double min = RotationalWinchUtil.findRotationalWinchPos(70);
 
     }
 

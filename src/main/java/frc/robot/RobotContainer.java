@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.commands.HangWait;
 import frc.robot.commands.AutoDrive;
 import frc.robot.commands.Callibrate;
 import frc.robot.commands.DriveCommand;
@@ -13,9 +14,11 @@ import frc.robot.subsystems.WinchSubsystem;
 import frc.robot.Constants.Linear;
 import frc.robot.Constants.Rotation;
 import frc.robot.Lib.RotationalWinchUtil;
+import frc.robot.commands.AutoCalibrate;
 import frc.robot.commands.AutoClimb;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cscore.VideoSink;
+import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
 //import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
 import edu.wpi.first.cameraserver.CameraServer;
 //import edu.wpi.first.cameraserver.CameraServerShared;
@@ -23,7 +26,10 @@ import edu.wpi.first.cameraserver.CameraServer;
 //import edu.wpi.first.cscore.CameraServerJNI;
 //import edu.wpi.first.cscore.CvSink;
 //import edu.wpi.first.cscore.MjpegServer;
-//
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+
 public class RobotContainer {
     private Joystick joystick;
     private final Joystick buttonBoard;
@@ -41,7 +47,9 @@ public class RobotContainer {
         driveSubsystem = new DriveSubsystem();
         linearWinchSubsystem = new WinchSubsystem(Linear.leftID, Linear.rightID, Linear.max, Linear.min, Linear.linearController, false, Linear.gearboxRatio);
         rotationalWinchSubsystem = new WinchSubsystem(Rotation.leftID, Rotation.rightID, Rotation.max, Rotation.min, Rotation.rotationController, true, Rotation.gearboxRatio);
-        
+        //linearWinchSubsystem.callibrate(0);
+        //rotationalWinchSubsystem.callibrate(RotationalWinchUtil.findRotationalWinchPos(90));
+
         //create and set default drive command
         driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1)*-1, () -> joystick.getRawAxis(0), driveSubsystem)); 
         //create forward and backward rotational winch command
@@ -53,6 +61,9 @@ public class RobotContainer {
         //create callibrate commands
         new JoystickButton(joystick, 9).whenPressed(new AutoClimb(linearWinchSubsystem, rotationalWinchSubsystem));
         new JoystickButton(joystick, 10).whenPressed(new AutoClimb(linearWinchSubsystem, rotationalWinchSubsystem).new nextRung(rotationalWinchSubsystem, linearWinchSubsystem));
+        new JoystickButton(joystick, 8).whenPressed(new AutoClimb(linearWinchSubsystem, rotationalWinchSubsystem).getExtend());
+
+        //new JoystickButton(joystick, 8).whenPressed(new HangWait(2, linearWinchSubsystem));
 
         JoystickButton up =  new JoystickButton(buttonBoard, 1);
         JoystickButton down =  new JoystickButton(buttonBoard, 2);
@@ -65,7 +76,8 @@ public class RobotContainer {
         JoystickButton callibrateSwitch =  new JoystickButton(buttonBoard, 16);
 
         new JoystickButton(buttonBoard, 3).whenPressed(new Callibrate(linearWinchSubsystem, 0, () -> callibrateSwitch.get()));
-        new JoystickButton(buttonBoard, 4).whenPressed(new Callibrate(rotationalWinchSubsystem, RotationalWinchUtil.findRotationalWinchPos(75), () -> callibrateSwitch.get()));
+        new JoystickButton(buttonBoard, 4).whenPressed(new Callibrate(rotationalWinchSubsystem, RotationalWinchUtil.findRotationalWinchPos(90), () -> callibrateSwitch.get()));
+
 
         
 
@@ -90,29 +102,50 @@ public class RobotContainer {
     
     
     public Command getAutoCommand(){
-        return new AutoDrive(.2, 36, driveSubsystem);
+
+        /*return new ParallelCommandGroup(
+            new AutoDrive(.2, (8*12), driveSubsystem),
+            new AutoCalibrate(linearWinchSubsystem, 4, -.1, -0.1)
+        );*/
+
+        return new SequentialCommandGroup(
+            new AutoCalibrate(linearWinchSubsystem, 4, -.1, -0.1), 
+            new WinchCommand(.15, 9.5, linearWinchSubsystem), 
+            new WinchCommand(.15, RotationalWinchUtil.findRotationalWinchPos(78), rotationalWinchSubsystem), 
+            new WinchCommand(.5, RotationalWinchUtil.findRotationalWinchPos(74), rotationalWinchSubsystem),
+            new WaitCommand(1),
+            new ParallelCommandGroup(
+                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(90), rotationalWinchSubsystem),
+                new AutoDrive(.2, (9*12), driveSubsystem), 
+                new WinchCommand(Linear.power, 0, linearWinchSubsystem)
+            )
+        );
+        
     }
 
-    UsbCamera cam0; 
-    UsbCamera cam1;
+    //UsbCamera cam0; 
+    //UsbCamera cam1;
     VideoSink server;
 
 
     public void switchCamera(int num){
         if(num == 0){
-            server.setSource(cam0);
+           // server.setSource(cam0);
         }
         else{
-            server.setSource(cam1);
+            //server.setSource(cam1);
         }
     }
 
     public void initCam() {
         
         // Get the back camera plugged into the RIO
-        cam0 = CameraServer.startAutomaticCapture(0);
-        //cam1 = CameraServer.startAutomaticCapture(1);
-        //cam1.setResolution(160, 120);
+        UsbCamera cam0 = CameraServer.startAutomaticCapture(0);
+        cam0.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+
+        //cam1 = CameraServer.startAutomaticCapture(1) ;
+        cam0.setResolution(160, 120);
+        cam0.setFPS(40);
         //CameraServer.getServer().setSource(cam0);
         //CameraServer.addServer("s").setSource(cam1);
 
