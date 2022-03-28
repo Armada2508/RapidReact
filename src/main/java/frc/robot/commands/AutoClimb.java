@@ -11,9 +11,9 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.Command;
 
 //import com.ctre.phoenix.sensors.Pigeon2;
-//import com.ctre.phoenix.sensors.PigeonIMU;
+import com.ctre.phoenix.sensors.PigeonIMU;
 
-//import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 
 public class AutoClimb extends SequentialCommandGroup{
@@ -100,7 +100,7 @@ public class AutoClimb extends SequentialCommandGroup{
             addCommands(
                 new WinchCommand(Linear.power, Linear.min, l),
                 new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(89), r), //get stat arms on
-                new WaitCommand(1.2),
+                //new WaitCommand(1.2),
                 new WinchCommand(.1, 6, l)
             );
         }
@@ -111,7 +111,7 @@ public class AutoClimb extends SequentialCommandGroup{
             addCommands(
                 new WinchCommand(Linear.power, Linear.min, l),
                 new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(89), r), //get stat arms on
-                new WaitCommand(2.0),
+                //new WaitCommand(2.0),
                 new WinchCommand(Linear.power, 6, l)
             );
         }
@@ -121,10 +121,12 @@ public class AutoClimb extends SequentialCommandGroup{
         public angleExtendAndGetOnBar(WinchSubsystem r, WinchSubsystem l){
             addCommands(
                 new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(120), r),
-                new WinchCommand(Linear.power, Linear.max, l),//extend all the way
+                //new WinchCommand(Linear.power, Linear.nearBar, l),//extend all the way
+                //new WaitUntilCommand(condition),    
+                new WinchCommand(Linear.power, Linear.max, l),
                 new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(98), r),//rotate so on bar
-                new WaitCommand(.1),
-                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(98), r),//rotate so on bar
+                //new WaitCommand(.1),
+                //new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(98), r),//rotate so on bar
                 new WinchCommand(Linear.power, 19, l) //retract a little so hook on
             );
         }

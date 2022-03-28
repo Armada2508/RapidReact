@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.HangWait;
+import frc.robot.commands.MotionMagicCommand;
 import frc.robot.commands.AutoDrive;
 import frc.robot.commands.Callibrate;
 import frc.robot.commands.DriveCommand;
@@ -16,9 +17,13 @@ import frc.robot.Constants.Rotation;
 import frc.robot.Lib.RotationalWinchUtil;
 import frc.robot.commands.AutoCalibrate;
 import frc.robot.commands.AutoClimb;
+import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cscore.VideoSink;
 import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
+
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+
 //import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
 import edu.wpi.first.cameraserver.CameraServer;
 //import edu.wpi.first.cameraserver.CameraServerShared;
@@ -78,6 +83,11 @@ public class RobotContainer {
         new JoystickButton(buttonBoard, 3).whenPressed(new Callibrate(linearWinchSubsystem, 0, () -> callibrateSwitch.get()));
         new JoystickButton(buttonBoard, 4).whenPressed(new Callibrate(rotationalWinchSubsystem, RotationalWinchUtil.findRotationalWinchPos(90), () -> callibrateSwitch.get()));
 
+        WPI_TalonFX talon = new WPI_TalonFX(7);
+        new JoystickButton(joystick, 11).whenPressed(new MotionMagicCommand(10, talon, rotationalWinchSubsystem));
+        new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(0, talon, rotationalWinchSubsystem));
+
+
 
         
 
@@ -110,14 +120,14 @@ public class RobotContainer {
 
         return new SequentialCommandGroup(
             new AutoCalibrate(linearWinchSubsystem, 4, -.1, -0.1), 
-            new WinchCommand(.15, 9.5, linearWinchSubsystem), 
+            new WinchCommand(.15, 8, linearWinchSubsystem), 
             new WinchCommand(.15, RotationalWinchUtil.findRotationalWinchPos(78), rotationalWinchSubsystem), 
             new WinchCommand(.5, RotationalWinchUtil.findRotationalWinchPos(74), rotationalWinchSubsystem),
             new WaitCommand(1),
             new ParallelCommandGroup(
                 new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(90), rotationalWinchSubsystem),
                 new AutoDrive(.2, (9*12), driveSubsystem), 
-                new WinchCommand(Linear.power, 0, linearWinchSubsystem)
+                new WinchCommand(Linear.power*2, 0, linearWinchSubsystem)
             )
         );
         
@@ -140,14 +150,15 @@ public class RobotContainer {
     public void initCam() {
         
         // Get the back camera plugged into the RIO
-        UsbCamera cam0 = CameraServer.startAutomaticCapture(0);
-        cam0.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
-
-        //cam1 = CameraServer.startAutomaticCapture(1) ;
+        UsbCamera cam0 = CameraServer.startAutomaticCapture("Abc", 0);
         cam0.setResolution(160, 120);
-        cam0.setFPS(40);
-        //CameraServer.getServer().setSource(cam0);
-        //CameraServer.addServer("s").setSource(cam1);
+        cam0.setFPS(20);
+
+        MjpegServer cam0Stream = new MjpegServer("Top Camera", 1185);
+        cam0Stream.setSource(cam0);
+        cam0Stream.setResolution(160, 120);
+        cam0Stream.setFPS(20);
+        cam0Stream.setCompression(70);
 
         
         //switchCamera(1);

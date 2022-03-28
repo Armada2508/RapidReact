@@ -34,7 +34,8 @@ public class Constants {
         public static final int rightID = 5; 
         public static final double power = .3;
         public static final double max = 27;
-        public static final double min = 0;                                 
+        public static final double min = 0;
+        public static final double nearBar = max-5;                                 
         public static final PIDController linearController = new PIDController(.0002, .00001, .000020);
         public static final int gearboxRatio = 20;
 
