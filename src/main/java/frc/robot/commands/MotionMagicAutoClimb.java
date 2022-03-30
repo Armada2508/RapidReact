@@ -97,7 +97,7 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
                     //new WinchCommand(Linear.power, 6, l),
                     new MotionMagicCommand(Linear.min, l, 15, 20),
                     //new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(72), r),
-                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(72), r, 10, 30)
+                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(72), r, 6, 10)
                 )
             );
         }
@@ -121,12 +121,12 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
         public getStatArmsOn2(WinchSubsystem r, WinchSubsystem l){
             addCommands(
                 //new WinchCommand(Linear.power, Linear.min, l),
-                new MotionMagicCommand(Linear.min, l, 10, 30),
+                new MotionMagicCommand(Linear.min, l, 15, 30),
                 //new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(89), r), //get stat arms on
                 new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(89), r, 10, 30),
                 //new WaitCommand(2.0),
                 //new WinchCommand(Linear.power, 6, l),
-                new MotionMagicCommand(2, l, 10, 30)
+                new MotionMagicCommand(2, l, 15, 30)
             );
         }
     }
@@ -142,11 +142,11 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
                 new MotionMagicCommand(Linear.max-1, l, 25, 60),
                 new WaitUntilCommand(() -> atMid()),
                 //new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(98), r),//rotate so on bar
-                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(98), r, 15, 45),
+                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(100), r, 15, 45),
                 //new WaitCommand(.1),
                 //new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(98), r),//rotate so on bar
                 //new WinchCommand(Linear.power, 19, l) //retract a little so hook on
-                new MotionMagicCommand(19, l, 10, 20)
+                new MotionMagicCommand(19, l, 15, 20)
             );
         }
     }
