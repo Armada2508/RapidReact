@@ -32,6 +32,8 @@ public class WinchSubsystem extends SubsystemBase{
         this.controller = controller;
         left = new WPI_TalonFX(ID1);
         right = new WPI_TalonFX(ID2);
+        //left.configFactoryDefault();
+        //right.configFactoryDefault();
         if(top){
             left.setInverted(true);
         }
@@ -42,6 +44,9 @@ public class WinchSubsystem extends SubsystemBase{
         this.max = max;
         this.min = min;
         brake();
+    }
+    public double getGearBoxRatio() {
+        return gearBoxRatio;
     }
 
     public PIDController getController(){

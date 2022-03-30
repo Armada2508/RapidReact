@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.HangWait;
+import frc.robot.commands.MotionMagicAutoClimb;
 import frc.robot.commands.MotionMagicCommand;
 import frc.robot.commands.AutoDrive;
 import frc.robot.commands.Callibrate;
@@ -64,7 +65,8 @@ public class RobotContainer {
         new JoystickButton(joystick, 5).whileHeld(new WinchCommand(Linear.power, linearWinchSubsystem));
         new JoystickButton(joystick, 3).whileHeld(new WinchCommand(Linear.power*-1, linearWinchSubsystem));
         //create callibrate commands
-        new JoystickButton(joystick, 9).whenPressed(new AutoClimb(linearWinchSubsystem, rotationalWinchSubsystem));
+        //new JoystickButton(joystick, 9).whenPressed(new AutoClimb(linearWinchSubsystem, rotationalWinchSubsystem));
+        new JoystickButton(joystick, 9).whenPressed(new MotionMagicAutoClimb(linearWinchSubsystem, rotationalWinchSubsystem));
         new JoystickButton(joystick, 10).whenPressed(new AutoClimb(linearWinchSubsystem, rotationalWinchSubsystem).new nextRung(rotationalWinchSubsystem, linearWinchSubsystem));
         new JoystickButton(joystick, 8).whenPressed(new AutoClimb(linearWinchSubsystem, rotationalWinchSubsystem).getExtend());
 
@@ -83,9 +85,8 @@ public class RobotContainer {
         new JoystickButton(buttonBoard, 3).whenPressed(new Callibrate(linearWinchSubsystem, 0, () -> callibrateSwitch.get()));
         new JoystickButton(buttonBoard, 4).whenPressed(new Callibrate(rotationalWinchSubsystem, RotationalWinchUtil.findRotationalWinchPos(90), () -> callibrateSwitch.get()));
 
-        WPI_TalonFX talon = new WPI_TalonFX(7);
-        new JoystickButton(joystick, 11).whenPressed(new MotionMagicCommand(10, talon, rotationalWinchSubsystem));
-        new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(0, talon, rotationalWinchSubsystem));
+        new JoystickButton(joystick, 11).whenPressed(new MotionMagicCommand(10, linearWinchSubsystem, 20, 10));
+        new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(0, linearWinchSubsystem, 20, 10));
 
 
 

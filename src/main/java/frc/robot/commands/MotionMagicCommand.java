@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.FollowerType;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
@@ -9,76 +10,132 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Lib.Encoder;
 import frc.robot.subsystems.WinchSubsystem;
 import frc.robot.Constants;
+import frc.robot.Constants.Winch;
+
+import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 
 
 public class MotionMagicCommand extends CommandBase{
     private final int timeout = 30;
     private final int PIDslotIndex = 0;
     private final int PIDLoopIndex = 0;
-    private final int framePeriod = 10;
+    private final int framePeriod = 20;
     private final double kF = 0;
-    private final double kP = .2;
+    private final double kP = .4;
     private final double kI = 0;
-    private final double kD = 0;
+    private final double kD = 2;
+    private final double velocity;
+    private final double acceleration;
 
     private WPI_TalonFX motor;
-    private double pos;
+    private WPI_TalonFX motor2;
+    private WinchSubsystem s;
+
+    private double targetPos;
 
 
-    public MotionMagicCommand(double pos, WPI_TalonFX motor, WinchSubsystem s){
-        this.motor = motor;
-        this.pos = pos;
+    public MotionMagicCommand(double targetPos, WinchSubsystem s, double velocity, double acceleration){
+        this.motor = s.getLeftTanlonFX();
+        this.motor2 = s.getRightTanlonFX();
+        this.targetPos = targetPos;
+        this.s = s;
+        this.velocity = velocity;
+        this.acceleration = acceleration;
+
         addRequirements(s);
-
-
-        motor.configFactoryDefault();
         
+
+        //motor.configFactoryDefault();
+        //motor2.configFactoryDefault();
+
+        //motor2.setInverted(true);
+
+
         motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, PIDslotIndex, timeout);
+        motor2.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, PIDslotIndex, timeout);
+
         //config deadband?
-        //motor inverted
+        //motor.setInverted(true); //inverted
 
         motor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, framePeriod, timeout);
+        motor2.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, framePeriod, timeout);
         motor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, framePeriod, timeout);
+        motor2.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, framePeriod, timeout);
+
 
         motor.configNominalOutputForward(0);
+        motor2.configNominalOutputForward(0);
         motor.configNominalOutputReverse(0);
-        motor.configPeakOutputForward(.3);
-        motor.configPeakOutputReverse(-.3);
+        motor2.configNominalOutputReverse(0);
+        motor.configPeakOutputForward(.6);
+        motor2.configPeakOutputForward(.6);
+        motor.configPeakOutputReverse(-.6);
+        motor2.configPeakOutputReverse(-.6);
+
 
         motor.selectProfileSlot(PIDslotIndex, PIDLoopIndex);
-        motor.config_kF(PIDslotIndex, kF);
-        motor.config_kP(PIDslotIndex, kP);
-        motor.config_kI(PIDslotIndex, kI);
-        motor.config_kD(PIDslotIndex, kD);
+        motor2.selectProfileSlot(PIDslotIndex, PIDLoopIndex);
 
-        motor.configMotionCruiseVelocity(Encoder.fromVelocity(20, Constants.Winch.encoderUnits, Constants.Rotation.gearboxRatio, Constants.Winch.diameter, .100));
-        motor.configMotionAcceleration(Encoder.fromVelocity(5, Constants.Winch.encoderUnits, Constants.Rotation.gearboxRatio, Constants.Winch.diameter, .100));
+        motor.config_kF(PIDslotIndex, kF);
+        motor2.config_kF(PIDslotIndex, kF);
+
+        motor.config_kP(PIDslotIndex, kP);
+        motor2.config_kP(PIDslotIndex, kP);
+
+        motor.config_kI(PIDslotIndex, kI);
+        motor2.config_kI(PIDslotIndex, kI);
+
+        motor.config_kD(PIDslotIndex, kD);
+        motor2.config_kD(PIDslotIndex, kD);
+
+
+
+        motor.configMotionCruiseVelocity(Encoder.fromVelocity(velocity, Constants.Winch.encoderUnits, s.getGearBoxRatio(), Constants.Winch.diameter, .100));
+        motor2.configMotionCruiseVelocity(Encoder.fromVelocity(velocity, Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter, .100));
+
+        motor.configMotionAcceleration(Encoder.fromVelocity(acceleration, Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter, .100));
+        motor2.configMotionAcceleration(Encoder.fromVelocity(acceleration, Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter, .100));
 
         //motor.setSelectedSensorPosition(0);
+
     }
 
     @Override
     public void initialize() {
-        motor.set(ControlMode.MotionMagic, Encoder.fromDistance(pos, Constants.Winch.encoderUnits, Constants.Rotation.gearboxRatio, Constants.Winch.diameter));
+        motor.set(ControlMode.MotionMagic, Encoder.fromDistance(targetPos, Constants.Winch.encoderUnits, s.getGearBoxRatio(), Constants.Winch.diameter));
+       // motor2.follow(motor, FollowerType.AuxOutput1);
+        motor2.set(ControlMode.MotionMagic, Encoder.fromDistance(targetPos, Constants.Winch.encoderUnits, s.getGearBoxRatio(), Constants.Winch.diameter));
+
     }
   
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-       
+       // motor2.follow(motor, FollowerType.AuxOutput1);
+
     }
   
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
         motor.set(ControlMode.PercentOutput, 0);
-        
+        motor2.set(ControlMode.PercentOutput, 0);
+
     }
   
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-      return false;
+        //return false;
+        //my code that works but is also ducked at the same time
+        //return Encoder.toDistance(motor.getSelectedSensorPosition(), Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter) >= targetPos - 0.3 && Encoder.toDistance(motor.getSelectedSensorPosition(), Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter) <= targetPos + 0.3) {
+           
+        if (s.getleftPostition() >= targetPos - 0.3 && s.getleftPostition() <= targetPos + 0.3) {
+            return true;
+        }
+        else {
+          return false;
+        }
     }
 
 
