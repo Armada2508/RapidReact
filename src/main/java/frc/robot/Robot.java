@@ -69,7 +69,8 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    System.out.println(pigeon.getPitch());
+    // TODO: Remove, used for testing
+    // System.out.println(pigeon.getPitch());
   }
 
   /** This function is called once when the robot is disabled. */

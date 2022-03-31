@@ -48,7 +48,7 @@ public class RobotContainer {
         //create joystick, drive subsystem, linear winch subsystem, and rotational winch subsystem
         joystick = new Joystick(0);
         buttonBoard = new Joystick(1);
-        initCam();
+        // initCam();
 
         driveSubsystem = new DriveSubsystem();
         linearWinchSubsystem = new WinchSubsystem(Linear.leftID, Linear.rightID, Linear.max, Linear.min, Linear.linearController, false, Linear.gearboxRatio);
@@ -57,7 +57,7 @@ public class RobotContainer {
         //rotationalWinchSubsystem.callibrate(RotationalWinchUtil.findRotationalWinchPos(90));
 
         //create and set default drive command
-        driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1)*-1, () -> joystick.getRawAxis(0), driveSubsystem)); 
+        driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1)*-1, () -> joystick.getRawAxis(1), driveSubsystem)); 
         //create forward and backward rotational winch command
         new JoystickButton(joystick, 6).whileHeld(new WinchCommand(Rotation.power,  rotationalWinchSubsystem));
         new JoystickButton(joystick, 4).whileHeld(new WinchCommand(Rotation.power*-1, rotationalWinchSubsystem));
@@ -85,8 +85,8 @@ public class RobotContainer {
         new JoystickButton(buttonBoard, 3).whenPressed(new Callibrate(linearWinchSubsystem, 0, () -> callibrateSwitch.get()));
         new JoystickButton(buttonBoard, 4).whenPressed(new Callibrate(rotationalWinchSubsystem, RotationalWinchUtil.findRotationalWinchPos(90), () -> callibrateSwitch.get()));
 
-        new JoystickButton(joystick, 11).whenPressed(new MotionMagicCommand(10, linearWinchSubsystem, 20, 10));
-        new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(0, linearWinchSubsystem, 20, 10));
+        new JoystickButton(joystick, 11).whenPressed(new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(80), rotationalWinchSubsystem, 30, 20));
+        new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(110), rotationalWinchSubsystem, 30, 20));
 
 
 

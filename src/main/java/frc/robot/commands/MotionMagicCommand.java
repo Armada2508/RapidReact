@@ -19,11 +19,11 @@ public class MotionMagicCommand extends CommandBase{
     private final int timeout = 30;
     private final int PIDslotIndex = 0;
     private final int PIDLoopIndex = 0;
-    private final int framePeriod = 20;
+    private final int framePeriod = 10;
     private final double kF = 0;
-    private final double kP = .4;
-    private final double kI = 0;
-    private final double kD = 2;
+    private final double kP = 0.5;
+    private final double kI = 0.02;//0.003;
+    private final double kD = 0.01;//0.02;
     private final double velocity;
     private final double acceleration;
 
@@ -130,7 +130,7 @@ public class MotionMagicCommand extends CommandBase{
         //my code that works but is also ducked at the same time
         //return Encoder.toDistance(motor.getSelectedSensorPosition(), Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter) >= targetPos - 0.3 && Encoder.toDistance(motor.getSelectedSensorPosition(), Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter) <= targetPos + 0.3) {
            
-        if (s.getleftPostition() >= targetPos - 0.3 && s.getleftPostition() <= targetPos + 0.3) {
+        if (s.getleftPostition() >= targetPos - 0.001 && s.getleftPostition() <= targetPos + 0.001) {
             return true;
         }
         else {
