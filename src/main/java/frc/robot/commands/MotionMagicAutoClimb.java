@@ -36,7 +36,7 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
             new nextRung(rotation, linear),
             //new PrintCommand("second rung"),
             //new WaitCommand(3),
-            new nextRung(rotation, linear)
+            new lastRung(rotation, linear)
             //new WinchCommand(.1, 0, linear)
             //new WaitCommand(3),
             //new PrintCommand("third rung")
@@ -107,7 +107,7 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
         public getStatArmsOn(WinchSubsystem r, WinchSubsystem l){
             addCommands(
                 //new WinchCommand(Linear.power, Linear.min, l),
-                new MotionMagicCommand(Linear.min, l, 10, 30),
+                new MotionMagicCommand(Linear.min, l, 15, 30),
                 //new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(89), r), //get stat arms on
                 new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(89), r, 10, 30),
                 //new WaitCommand(1.2),
