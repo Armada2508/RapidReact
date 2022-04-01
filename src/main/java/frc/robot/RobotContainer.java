@@ -85,8 +85,8 @@ public class RobotContainer {
         new JoystickButton(buttonBoard, 3).whenPressed(new Callibrate(linearWinchSubsystem, 0, () -> callibrateSwitch.get()));
         new JoystickButton(buttonBoard, 4).whenPressed(new Callibrate(rotationalWinchSubsystem, RotationalWinchUtil.findRotationalWinchPos(90), () -> callibrateSwitch.get()));
 
-        new JoystickButton(joystick, 11).whenPressed(new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(80), rotationalWinchSubsystem, 30, 20));
-        new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(110), rotationalWinchSubsystem, 30, 20));
+        new JoystickButton(joystick, 11).whenPressed(new MotionMagicCommand(5, linearWinchSubsystem, 15, 20));
+        new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(15, linearWinchSubsystem, 15, 20));
 
 
 

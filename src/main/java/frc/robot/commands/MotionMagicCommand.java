@@ -21,12 +21,12 @@ public class MotionMagicCommand extends CommandBase{
     private final int PIDLoopIndex = 0;
     private final int framePeriod = 10;
     private final double kF = 0;
-    //private final double kP = 0.4;
-    //private final double kI = 0.0;//0.003;
-    //private final double kD = 2;
-    private final double kP = 0.5;
-    private final double kI = 0.02;//0.003;
-    private final double kD = 0.01;//0.02;
+    private final double kP = .5;
+    private final double kI = 0.0001;//0.02;//0.003;
+    private final double kD = 3;
+    // private final double kP = 0.5;
+    // private final double kI = 0.02;//0.003;
+    // private final double kD = 0.01;//0.02;
     private final double velocity;
     private final double acceleration;
 
@@ -108,12 +108,14 @@ public class MotionMagicCommand extends CommandBase{
         motor.set(ControlMode.MotionMagic, Encoder.fromDistance(targetPos, Constants.Winch.encoderUnits, s.getGearBoxRatio(), Constants.Winch.diameter));
        // motor2.follow(motor, FollowerType.AuxOutput1);
         motor2.set(ControlMode.MotionMagic, Encoder.fromDistance(targetPos, Constants.Winch.encoderUnits, s.getGearBoxRatio(), Constants.Winch.diameter));
-
+        motor.setIntegralAccumulator(0);
+        motor2.setIntegralAccumulator(0);
     }
   
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        //System.out.println(motor.getIntegralAccumulator()  + "  " + motor.getErrorDerivative());
        // motor2.follow(motor, FollowerType.AuxOutput1);
 
     }
@@ -133,7 +135,7 @@ public class MotionMagicCommand extends CommandBase{
         //my code that works but is also ducked at the same time
         //return Encoder.toDistance(motor.getSelectedSensorPosition(), Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter) >= targetPos - 0.3 && Encoder.toDistance(motor.getSelectedSensorPosition(), Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter) <= targetPos + 0.3) {
            
-        if (s.getleftPostition() >= targetPos - 0.01 && s.getleftPostition() <= targetPos + 0.01) {
+        if (s.getleftPostition() >= targetPos - 0.05 && s.getleftPostition() <= targetPos + 0.05) {
             return true;
         }
         else {

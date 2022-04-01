@@ -70,7 +70,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     // TODO: Remove, used for testing
-    // System.out.println(pigeon.getPitch());
+    System.out.println(pigeon.getPitch());
   }
 
   /** This function is called once when the robot is disabled. */
