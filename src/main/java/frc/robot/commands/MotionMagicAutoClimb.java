@@ -91,7 +91,7 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
             );
         }
     }
-    //shorter wait time
+
     public class getStatArmsOn2 extends SequentialCommandGroup{
         public getStatArmsOn2(WinchSubsystem r, WinchSubsystem l){
             addCommands(
@@ -105,13 +105,15 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
     public class angleExtendAndGetOnBar extends SequentialCommandGroup{
         public angleExtendAndGetOnBar(WinchSubsystem r, WinchSubsystem l){
             addCommands(
-                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(120), r, 15, 30),
-                new MotionMagicCommand(Linear.max-1, l, 25, 60),
+                new ParallelCommandGroup(
+                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(120), r, 15, 30),
+                    new MotionMagicCommand(Linear.max-1, l, 25, 60)
+                ),
                 new WaitUntilCommand(() -> atMid()),
                 new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(100), r, 15, 45),
-                new MotionMagicCommand(24, l, 15, 15),
+                new MotionMagicCommand(24, l, 15, 30),
                 new WaitUntilCommand(() -> go()),
-                new MotionMagicCommand(16, l, 15, 30)
+                new MotionMagicCommand(16, l, 15, 40)
             );
         }
     }
@@ -126,7 +128,7 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
         currentPitch = pigeon.getPitch();
         previousPitch = temp;
 
-        if ((currentPitch-previousPitch) < .000001 && currentPitch < 15){
+        if ((currentPitch-previousPitch) < 0 && currentPitch < 15){
             resetVals();
             return true;
         }
@@ -145,7 +147,7 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
         temp = currentPitch;
         currentPitch = pigeon.getPitch();
         previousPitch = temp;
-        if ((currentPitch-previousPitch) > .000001 && currentPitch > 15){
+        if ((currentPitch-previousPitch) > 0 && currentPitch > 15){
             resetVals();
             return true;
         }
