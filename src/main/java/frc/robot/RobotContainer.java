@@ -3,13 +3,14 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.commands.HangWait;
+//import frc.robot.commands.HangWait;
 import frc.robot.commands.MotionMagicAutoClimb;
 import frc.robot.commands.MotionMagicCommand;
 import frc.robot.commands.AutoDrive;
 import frc.robot.commands.Callibrate;
 import frc.robot.commands.DriveCommand;
 import frc.robot.commands.OneMotorCommand;
+import frc.robot.commands.SetYawCommand;
 import frc.robot.commands.WinchCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.WinchSubsystem;
@@ -18,13 +19,15 @@ import frc.robot.Constants.Rotation;
 import frc.robot.Lib.RotationalWinchUtil;
 import frc.robot.commands.AutoCalibrate;
 import frc.robot.commands.AutoClimb;
+import frc.robot.commands.AutoTurn;
 import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.cscore.VideoSink;
-import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
-
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-
+//import edu.wpi.first.cscore.VideoSink;
+//import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+//import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 //import edu.wpi.first.cscore.VideoSource.ConnectionStrategy;
 import edu.wpi.first.cameraserver.CameraServer;
 //import edu.wpi.first.cameraserver.CameraServerShared;
@@ -33,22 +36,30 @@ import edu.wpi.first.cameraserver.CameraServer;
 //import edu.wpi.first.cscore.CvSink;
 //import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+//import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import com.ctre.phoenix.sensors.PigeonIMU;
 
 public class RobotContainer {
     private Joystick joystick;
     private final Joystick buttonBoard;
+    private PigeonIMU pigeon;
 
     private DriveSubsystem driveSubsystem;
     private WinchSubsystem linearWinchSubsystem;
     private WinchSubsystem rotationalWinchSubsystem;
+    Command closeAuto; 
+    Command farAuto;
+    SendableChooser<Command> AutoChooser;
+    Shuffleboard shuffleboard;
 
     public RobotContainer(){
         //create joystick, drive subsystem, linear winch subsystem, and rotational winch subsystem
         joystick = new Joystick(0);
         buttonBoard = new Joystick(1);
-        // initCam();
+        pigeon = new PigeonIMU(8);
+        
 
         driveSubsystem = new DriveSubsystem();
         linearWinchSubsystem = new WinchSubsystem(Linear.leftID, Linear.rightID, Linear.max, Linear.min, Linear.linearController, false, Linear.gearboxRatio);
@@ -59,6 +70,54 @@ public class RobotContainer {
         //create and set default drive command
         driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1)*-1, () -> joystick.getRawAxis(0), driveSubsystem)); 
         //create forward and backward rotational winch command
+        initButton(); 
+        initChooser();
+        // initCam();
+    }
+    
+    public Command getAutoCommand(){
+        return new SequentialCommandGroup(
+            new AutoCalibrate(linearWinchSubsystem, 4, -.1, -0.1), 
+            new SetYawCommand(true, pigeon),
+            new WinchCommand(.15, 8, linearWinchSubsystem), 
+            new WinchCommand(.15, RotationalWinchUtil.findRotationalWinchPos(78), rotationalWinchSubsystem), 
+            new WinchCommand(.5, RotationalWinchUtil.findRotationalWinchPos(74), rotationalWinchSubsystem),
+            new WaitCommand(1),
+            new ParallelCommandGroup(
+                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(90), rotationalWinchSubsystem),
+                new AutoDrive(.2, (9*12), driveSubsystem), 
+                new WinchCommand(Linear.power*2, 0, linearWinchSubsystem)
+            )
+        );
+        
+    }
+
+    public Command getAltAutoCommand() { 
+        return new SequentialCommandGroup( 
+            new AutoCalibrate(linearWinchSubsystem, 4, -.1, -0.1),
+            new WinchCommand(.1, RotationalWinchUtil.findRotationalWinchPos(105), rotationalWinchSubsystem),
+            new WaitCommand(3),
+            new AutoDrive(.25, (-4*12), driveSubsystem),
+            new AutoTurn(.15, 45, driveSubsystem, pigeon),
+            new AutoDrive(.25, (-9), driveSubsystem),
+            new SetYawCommand(true, pigeon),
+            new ParallelCommandGroup(
+                new MotionMagicCommand(8, linearWinchSubsystem, 15, 15),
+                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(78), rotationalWinchSubsystem, 15, 15)
+            ),
+            new WinchCommand(.5, RotationalWinchUtil.findRotationalWinchPos(74), rotationalWinchSubsystem),
+            new WaitCommand(.1),
+            new ParallelCommandGroup(
+                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(90), rotationalWinchSubsystem),
+                new AutoDrive(.2, (2*12), driveSubsystem),
+                new WinchCommand(Linear.power*2, 0, linearWinchSubsystem)
+            ),
+            new AutoTurn(.15, -45, driveSubsystem, pigeon),
+            new AutoDrive(.3, (6*12), driveSubsystem) 
+        );
+    }
+
+    public void initButton(){
         new JoystickButton(joystick, 6).whileHeld(new WinchCommand(Rotation.power,  rotationalWinchSubsystem));
         new JoystickButton(joystick, 4).whileHeld(new WinchCommand(Rotation.power*-1, rotationalWinchSubsystem));
         //create forward and backward linear winch command
@@ -85,71 +144,29 @@ public class RobotContainer {
         new JoystickButton(buttonBoard, 3).whenPressed(new Callibrate(linearWinchSubsystem, 0, () -> callibrateSwitch.get()));
         new JoystickButton(buttonBoard, 4).whenPressed(new Callibrate(rotationalWinchSubsystem, RotationalWinchUtil.findRotationalWinchPos(90), () -> callibrateSwitch.get()));
 
-        new JoystickButton(joystick, 11).whenPressed(new MotionMagicCommand(5, linearWinchSubsystem, 15, 20));
-        new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(15, linearWinchSubsystem, 15, 20));
+        // new JoystickButton(joystick, 11).whenPressed(new MotionMagicCommand(5, linearWinchSubsystem, 15, 20));
+        // new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(15, linearWinchSubsystem, 15, 20));
 
+        new JoystickButton(joystick, 11).whenPressed(new AutoTurn(.2, -45, driveSubsystem, pigeon));  
+        //create a button to align robot using the Yaw from the Pigeon inside of SetYawCommand
 
-
-        
-
-//button board command
-        //move arms up
-        //move arms down
-        //rotate forward
-        //rotate backward
-        //indvidual motors
-            //make new command (in intialize set power to .1, in end set power to 0 and brake)
-
-
-
-
-
-       //initCam();
-    }/*you could have a button that reconfigured the buttons/commands
-    and then you could press it to flip back and forth between two or more "pages" of buttons
-    kind of like how soundboards have multiple channels represented on the same phsical location 
-    and button depending on which page it's on. Or based on match time you have differnt buttons */
-
-    
-    
-    public Command getAutoCommand(){
-
-        /*return new ParallelCommandGroup(
-            new AutoDrive(.2, (8*12), driveSubsystem),
-            new AutoCalibrate(linearWinchSubsystem, 4, -.1, -0.1)
-        );*/
-
-        return new SequentialCommandGroup(
-            new AutoCalibrate(linearWinchSubsystem, 4, -.1, -0.1), 
-            new WinchCommand(.15, 8, linearWinchSubsystem), 
-            new WinchCommand(.15, RotationalWinchUtil.findRotationalWinchPos(78), rotationalWinchSubsystem), 
-            new WinchCommand(.5, RotationalWinchUtil.findRotationalWinchPos(74), rotationalWinchSubsystem),
-            new WaitCommand(1),
-            new ParallelCommandGroup(
-                new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(90), rotationalWinchSubsystem),
-                new AutoDrive(.2, (9*12), driveSubsystem), 
-                new WinchCommand(Linear.power*2, 0, linearWinchSubsystem)
-            )
-        );
-        
     }
 
-    //UsbCamera cam0; 
-    //UsbCamera cam1;
-    VideoSink server;
-
-
-    public void switchCamera(int num){
-        if(num == 0){
-           // server.setSource(cam0);
-        }
-        else{
-            //server.setSource(cam1);
-        }
+    public void initChooser(){
+        closeAuto = getAutoCommand();
+        farAuto = getAltAutoCommand();
+        AutoChooser = new SendableChooser<>();
+        AutoChooser.setDefaultOption("Close Auto", closeAuto);
+        AutoChooser.addOption("Away Auto", farAuto);
+        ShuffleboardTab tab = Shuffleboard.getTab("Auto");
+            tab.add("AutoSender", AutoChooser);
     }
+
+    public Command getAutonomousCommand() {
+        return AutoChooser.getSelected();
+    } 
 
     public void initCam() {
-        
         // Get the back camera plugged into the RIO
         UsbCamera cam0 = CameraServer.startAutomaticCapture("Abc", 0);
         cam0.setResolution(160, 120);
@@ -200,23 +217,8 @@ public class RobotContainer {
 }
 
 
-
-
-
-
-
-
-
-
 /*
 
 have equilize command that's called in end in winchCommand
-
-PID on falcons not rio
-
-motion magic
-
-
-
 
  */

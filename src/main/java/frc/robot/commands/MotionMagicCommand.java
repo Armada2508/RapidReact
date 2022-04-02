@@ -2,7 +2,7 @@ package frc.robot.commands;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.FollowerType;
+//import com.ctre.phoenix.motorcontrol.FollowerType;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
@@ -10,9 +10,8 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Lib.Encoder;
 import frc.robot.subsystems.WinchSubsystem;
 import frc.robot.Constants;
-import frc.robot.Constants.Winch;
 
-import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+//import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 
 
 public class MotionMagicCommand extends CommandBase{
@@ -132,9 +131,7 @@ public class MotionMagicCommand extends CommandBase{
     @Override
     public boolean isFinished() {
         //return false;
-        //my code that works but is also ducked at the same time
         //return Encoder.toDistance(motor.getSelectedSensorPosition(), Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter) >= targetPos - 0.3 && Encoder.toDistance(motor.getSelectedSensorPosition(), Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter) <= targetPos + 0.3) {
-           
         if (s.getleftPostition() >= targetPos - 0.05 && s.getleftPostition() <= targetPos + 0.05) {
             return true;
         }

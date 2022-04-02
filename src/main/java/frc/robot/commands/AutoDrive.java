@@ -27,6 +27,8 @@ public class AutoDrive extends CommandBase{
     @Override
     public void initialize() {
         System.out.println("initailzed");
+        subsystem.callibrate();
+
         if(distance > 0){
             subsystem.setPower(power, power);
         }
@@ -38,8 +40,8 @@ public class AutoDrive extends CommandBase{
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        System.out.println(subsystem.getRightPostition());
-        System.out.println(distance);
+        System.out.println(subsystem.getRightPostition() + "positon");
+        System.out.println(distance + "distance");
     }
   
     // Called once the command ends or is interrupted.

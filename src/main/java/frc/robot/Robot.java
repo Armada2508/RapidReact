@@ -10,9 +10,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Command;
 
-import com.ctre.phoenix.sensors.PigeonIMU;
 
-import frc.robot.subsystems.WinchSubsystem;
+//import frc.robot.subsystems.WinchSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -21,7 +20,6 @@ import frc.robot.subsystems.WinchSubsystem;
  * project.
  */
 public class Robot extends TimedRobot {
-  private PigeonIMU pigeon = new PigeonIMU(8);
   private RobotContainer robotContainer;
  
   /**
@@ -46,10 +44,9 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
   }
 
-
   @Override
   public void autonomousInit() {
-    Command auto = robotContainer.getAutoCommand();
+    Command auto = robotContainer.getAutonomousCommand();
     if (auto != null){
       auto.schedule();
     }
@@ -69,8 +66,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    // TODO: Remove, used for testing
-    System.out.println(pigeon.getPitch());
   }
 
   /** This function is called once when the robot is disabled. */

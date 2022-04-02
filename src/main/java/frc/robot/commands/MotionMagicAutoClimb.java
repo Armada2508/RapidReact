@@ -1,15 +1,15 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+//import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.WinchSubsystem;
-import frc.robot.Constants.Rotation;
+//import frc.robot.Constants.Rotation;
 import frc.robot.Lib.RotationalWinchUtil;
 import frc.robot.Constants.Linear;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
+//import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.Command;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+//import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 //import com.ctre.phoenix.sensors.Pigeon2;
 import com.ctre.phoenix.sensors.PigeonIMU;
 
@@ -113,7 +113,7 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
                 new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(100), r, 15, 45),
                 new MotionMagicCommand(24, l, 15, 30),
                 new WaitUntilCommand(() -> go()),
-                new MotionMagicCommand(16, l, 15, 40)
+                new MotionMagicCommand(14, l, 15, 40)
             );
         }
     }
