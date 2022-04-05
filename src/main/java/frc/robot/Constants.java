@@ -41,6 +41,11 @@ public class Constants {
 
     }
 
+    public static final class Intake {
+        public static final int IntakeLinearID = 10;
+        public static final int IntakeRotationID = 11; 
+    }
+
     public static final class Rotation {
         public static final int leftID = 6;
         public static final int rightID = 7; 

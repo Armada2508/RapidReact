@@ -9,13 +9,16 @@ import frc.robot.commands.MotionMagicCommand;
 import frc.robot.commands.AutoDrive;
 import frc.robot.commands.Callibrate;
 import frc.robot.commands.DriveCommand;
+import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.OneMotorCommand;
 import frc.robot.commands.SetYawCommand;
 import frc.robot.commands.WinchCommand;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.WinchSubsystem;
 import frc.robot.Constants.Linear;
 import frc.robot.Constants.Rotation;
+import frc.robot.Constants.Intake;
 import frc.robot.Lib.RotationalWinchUtil;
 import frc.robot.commands.AutoCalibrate;
 import frc.robot.commands.AutoClimb;
@@ -49,6 +52,8 @@ public class RobotContainer {
     private DriveSubsystem driveSubsystem;
     private WinchSubsystem linearWinchSubsystem;
     private WinchSubsystem rotationalWinchSubsystem;
+    private IntakeSubsystem intakeLinearSubsystem;
+    private IntakeSubsystem intakeRotationSubsystem;
     Command closeAuto; 
     Command farAuto;
     SendableChooser<Command> AutoChooser;
@@ -59,11 +64,14 @@ public class RobotContainer {
         joystick = new Joystick(0);
         buttonBoard = new Joystick(1);
         pigeon = new PigeonIMU(8);
+       
         
 
         driveSubsystem = new DriveSubsystem();
         linearWinchSubsystem = new WinchSubsystem(Linear.leftID, Linear.rightID, Linear.max, Linear.min, Linear.linearController, false, Linear.gearboxRatio);
         rotationalWinchSubsystem = new WinchSubsystem(Rotation.leftID, Rotation.rightID, Rotation.max, Rotation.min, Rotation.rotationController, true, Rotation.gearboxRatio);
+        intakeLinearSubsystem = new IntakeSubsystem(Intake.IntakeLinearID);
+        intakeRotationSubsystem = new IntakeSubsystem(Intake.IntakeRotationID);
         //linearWinchSubsystem.callibrate(0);
         //rotationalWinchSubsystem.callibrate(RotationalWinchUtil.findRotationalWinchPos(90));
 
@@ -126,8 +134,8 @@ public class RobotContainer {
         //create callibrate commands
         //new JoystickButton(joystick, 9).whenPressed(new AutoClimb(linearWinchSubsystem, rotationalWinchSubsystem));
         new JoystickButton(joystick, 9).whenPressed(new MotionMagicAutoClimb(linearWinchSubsystem, rotationalWinchSubsystem));
-        new JoystickButton(joystick, 10).whenPressed(new AutoClimb(linearWinchSubsystem, rotationalWinchSubsystem).new nextRung(rotationalWinchSubsystem, linearWinchSubsystem));
-        new JoystickButton(joystick, 8).whenPressed(new AutoClimb(linearWinchSubsystem, rotationalWinchSubsystem).getExtend());
+        new JoystickButton(joystick, 10).whenPressed(new MotionMagicAutoClimb(linearWinchSubsystem, rotationalWinchSubsystem).new nextRung(rotationalWinchSubsystem, linearWinchSubsystem));
+        new JoystickButton(joystick, 8).whenPressed(new MotionMagicAutoClimb(linearWinchSubsystem, rotationalWinchSubsystem).getExtend());
 
         //new JoystickButton(joystick, 8).whenPressed(new HangWait(2, linearWinchSubsystem));
 
@@ -148,8 +156,12 @@ public class RobotContainer {
         // new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(15, linearWinchSubsystem, 15, 20));
 
         new JoystickButton(joystick, 11).whenPressed(new AutoTurn(.2, -45, driveSubsystem, pigeon));  
-        //create a button to align robot using the Yaw from the Pigeon inside of SetYawCommand
 
+        new JoystickButton(joystick, 1).whileHeld(new IntakeCommand(.75, intakeLinearSubsystem));   //intake in
+        new JoystickButton(joystick, 2).whileHeld(new IntakeCommand(-.75, intakeLinearSubsystem)); //intake out
+        
+        new JoystickButton(joystick, 11).whileHeld(new IntakeCommand(.5, intakeRotationSubsystem));  //intake up?
+        new JoystickButton(joystick, 12).whileHeld(new IntakeCommand(-.5, intakeRotationSubsystem));  //intake down?
     }
 
     public void initChooser(){
