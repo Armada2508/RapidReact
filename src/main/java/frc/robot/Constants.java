@@ -50,6 +50,7 @@ public class Constants {
         public static final int leftID = 6;
         public static final int rightID = 7; 
         public static final double power = .25;
+        public static final double hangDegrees = 18;
 
 
         public static final double x = 8.5;

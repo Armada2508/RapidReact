@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Command;
-
+import com.ctre.phoenix.sensors.PigeonIMU;
 
 //import frc.robot.subsystems.WinchSubsystem;
 
@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class Robot extends TimedRobot {
   private RobotContainer robotContainer;
- 
+ private PigeonIMU p = new PigeonIMU(8);
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -42,6 +42,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    System.out.println(p.getPitch());
   }
 
   @Override

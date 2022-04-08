@@ -21,8 +21,10 @@ import frc.robot.Constants.Rotation;
 import frc.robot.Constants.Intake;
 import frc.robot.Lib.RotationalWinchUtil;
 import frc.robot.commands.AutoCalibrate;
-import frc.robot.commands.AutoClimb;
+//import frc.robot.commands.AutoClimb;
 import frc.robot.commands.AutoTurn;
+import edu.wpi.first.cscore.CameraServerJNI;
+import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.cscore.UsbCamera;
 //import edu.wpi.first.cscore.VideoSink;
@@ -42,6 +44,8 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 //import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+
+
 import com.ctre.phoenix.sensors.PigeonIMU;
 
 public class RobotContainer {
@@ -58,12 +62,14 @@ public class RobotContainer {
     Command farAuto;
     SendableChooser<Command> AutoChooser;
     Shuffleboard shuffleboard;
+    ShuffleboardTab tab = Shuffleboard.getTab("Main");
 
     public RobotContainer(){
         //create joystick, drive subsystem, linear winch subsystem, and rotational winch subsystem
         joystick = new Joystick(0);
         buttonBoard = new Joystick(1);
         pigeon = new PigeonIMU(8);
+
        
         
 
@@ -80,21 +86,22 @@ public class RobotContainer {
         //create forward and backward rotational winch command
         initButton(); 
         initChooser();
-        // initCam();
+        initCam();
     }
     
     public Command getAutoCommand(){
         return new SequentialCommandGroup(
             new AutoCalibrate(linearWinchSubsystem, 4, -.1, -0.1), 
-            new SetYawCommand(true, pigeon),
+            //new SetYawCommand(true, pigeon),
             new WinchCommand(.15, 8, linearWinchSubsystem), 
             new WinchCommand(.15, RotationalWinchUtil.findRotationalWinchPos(78), rotationalWinchSubsystem), 
-            new WinchCommand(.5, RotationalWinchUtil.findRotationalWinchPos(74), rotationalWinchSubsystem),
+            new WinchCommand(.5, RotationalWinchUtil.findRotationalWinchPos(71), rotationalWinchSubsystem),
             new WaitCommand(1),
             new ParallelCommandGroup(
                 new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(90), rotationalWinchSubsystem),
                 new AutoDrive(.2, (9*12), driveSubsystem), 
-                new WinchCommand(Linear.power*2, 0, linearWinchSubsystem)
+                new WinchCommand(Linear.power*2, 0, linearWinchSubsystem),
+                new IntakeCommand(-1, intakeLinearSubsystem) 
             )
         );
         
@@ -108,7 +115,7 @@ public class RobotContainer {
             new AutoDrive(.25, (-4*12), driveSubsystem),
             new AutoTurn(.15, 45, driveSubsystem, pigeon),
             new AutoDrive(.25, (-9), driveSubsystem),
-            new SetYawCommand(true, pigeon),
+            //new SetYawCommand(true, pigeon),
             new ParallelCommandGroup(
                 new MotionMagicCommand(8, linearWinchSubsystem, 15, 15),
                 new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(78), rotationalWinchSubsystem, 15, 15)
@@ -121,7 +128,11 @@ public class RobotContainer {
                 new WinchCommand(Linear.power*2, 0, linearWinchSubsystem)
             ),
             new AutoTurn(.15, -45, driveSubsystem, pigeon),
-            new AutoDrive(.3, (6*12), driveSubsystem) 
+            new ParallelCommandGroup(
+                new AutoDrive(.3, (6*12), driveSubsystem),
+                new IntakeCommand(-1, intakeLinearSubsystem) 
+            )
+            
         );
     }
 
@@ -155,13 +166,13 @@ public class RobotContainer {
         // new JoystickButton(joystick, 11).whenPressed(new MotionMagicCommand(5, linearWinchSubsystem, 15, 20));
         // new JoystickButton(joystick, 12).whenPressed(new MotionMagicCommand(15, linearWinchSubsystem, 15, 20));
 
-        new JoystickButton(joystick, 11).whenPressed(new AutoTurn(.2, -45, driveSubsystem, pigeon));  
+        new JoystickButton(joystick, 7).whenPressed(new AutoTurn(.2, -45, driveSubsystem, pigeon)); //angle to hangar
 
-        new JoystickButton(joystick, 1).whileHeld(new IntakeCommand(.75, intakeLinearSubsystem));   //intake in
-        new JoystickButton(joystick, 2).whileHeld(new IntakeCommand(-.75, intakeLinearSubsystem)); //intake out
+        new JoystickButton(joystick, 1).whileHeld(new IntakeCommand(-1, intakeLinearSubsystem));   //intake in
+        new JoystickButton(joystick, 2).whileHeld(new IntakeCommand(1, intakeLinearSubsystem)); //intake out
         
-        new JoystickButton(joystick, 11).whileHeld(new IntakeCommand(.5, intakeRotationSubsystem));  //intake up?
-        new JoystickButton(joystick, 12).whileHeld(new IntakeCommand(-.5, intakeRotationSubsystem));  //intake down?
+        new JoystickButton(joystick, 12).whileHeld(new IntakeCommand(.25, intakeRotationSubsystem));  //intake up?
+        new JoystickButton(joystick, 11).whileHeld(new IntakeCommand(-.25, intakeRotationSubsystem));  //intake down?
     }
 
     public void initChooser(){
@@ -170,8 +181,7 @@ public class RobotContainer {
         AutoChooser = new SendableChooser<>();
         AutoChooser.setDefaultOption("Close Auto", closeAuto);
         AutoChooser.addOption("Away Auto", farAuto);
-        ShuffleboardTab tab = Shuffleboard.getTab("Auto");
-            tab.add("AutoSender", AutoChooser);
+        tab.add("AutoSender", AutoChooser);
     }
 
     public Command getAutonomousCommand() {
@@ -180,15 +190,37 @@ public class RobotContainer {
 
     public void initCam() {
         // Get the back camera plugged into the RIO
-        UsbCamera cam0 = CameraServer.startAutomaticCapture("Abc", 0);
-        cam0.setResolution(160, 120);
-        cam0.setFPS(20);
 
-        MjpegServer cam0Stream = new MjpegServer("Top Camera", 1185);
-        cam0Stream.setSource(cam0);
-        cam0Stream.setResolution(160, 120);
-        cam0Stream.setFPS(20);
-        cam0Stream.setCompression(70);
+        UsbCamera cam = CameraServer.startAutomaticCapture("Camera", 0);
+        cam.setResolution(160, 120);
+        cam.setFPS(20);
+        // MjpegServer cam0Stream = new MjpegServer("Top Camera", 1185);
+        // cam0Stream.setSource(cam);
+        tab.add("Camera", cam);
+        // UsbCamera camera = new UsbCamera("MainCamera", 0);
+        // MjpegServer mjpegServer = new MjpegServer("mjpegmain", 1185);
+        // CvSink cvsink = new CvSink("cvmain");
+
+
+
+
+
+
+
+
+
+
+        // UsbCamera cam0 = CameraServer.startAutomaticCapture("Abc", 0);
+        // cam0.setResolution(160, 120);
+        // cam0.setFPS(20);
+
+        // MjpegServer cam0Stream = new MjpegServer("Top Camera", 1185);
+        // cam0Stream.setSource(cam0);
+        // cam0Stream.setResolution(160, 120);
+        // cam0Stream.setFPS(20);
+        // cam0Stream.setCompression(70);
+        // ShuffleboardTab tab = Shuffleboard.getTab("Main");
+        // tab.add("Camera", cam0);
 
         
         //switchCamera(1);

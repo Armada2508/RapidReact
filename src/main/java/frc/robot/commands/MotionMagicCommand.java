@@ -69,10 +69,10 @@ public class MotionMagicCommand extends CommandBase{
         motor2.configNominalOutputForward(0);
         motor.configNominalOutputReverse(0);
         motor2.configNominalOutputReverse(0);
-        motor.configPeakOutputForward(.6);
-        motor2.configPeakOutputForward(.6);
-        motor.configPeakOutputReverse(-.6);
-        motor2.configPeakOutputReverse(-.6);
+        motor.configPeakOutputForward(1);
+        motor2.configPeakOutputForward(1);
+        motor.configPeakOutputReverse(-1);
+        motor2.configPeakOutputReverse(-1);
 
 
         motor.selectProfileSlot(PIDslotIndex, PIDLoopIndex);
@@ -95,7 +95,7 @@ public class MotionMagicCommand extends CommandBase{
         motor.configMotionCruiseVelocity(Encoder.fromVelocity(velocity, Constants.Winch.encoderUnits, s.getGearBoxRatio(), Constants.Winch.diameter, .100));
         motor2.configMotionCruiseVelocity(Encoder.fromVelocity(velocity, Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter, .100));
 
-        motor.configMotionAcceleration(Encoder.fromVelocity(acceleration, Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter, .100));
+        System.out.println(motor.configMotionAcceleration(Encoder.fromVelocity(acceleration, Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter, .100)));
         motor2.configMotionAcceleration(Encoder.fromVelocity(acceleration, Constants.Winch.encoderUnits, Constants.Linear.gearboxRatio, Constants.Winch.diameter, .100));
 
         //motor.setSelectedSensorPosition(0);

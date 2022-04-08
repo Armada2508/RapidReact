@@ -6,6 +6,7 @@ import frc.robot.subsystems.WinchSubsystem;
 //import frc.robot.Constants.Rotation;
 import frc.robot.Lib.RotationalWinchUtil;
 import frc.robot.Constants.Linear;
+import frc.robot.Constants.Rotation;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 //import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -74,9 +75,10 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
     public class RetractAndLineUpStatArms extends SequentialCommandGroup{
         public RetractAndLineUpStatArms(WinchSubsystem r, WinchSubsystem l){
             addCommands(
-                new ParallelCommandGroup(
-                    new MotionMagicCommand(Linear.min, l, 15, 20),
-                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(72), r, 4, 4)
+                new SequentialCommandGroup(
+                    new MotionMagicCommand(8, l, 15, 20),
+                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(72), r, 4, 4),
+                    new MotionMagicCommand(Linear.min, l, 15, 20)
                 )
             );
         }
@@ -85,18 +87,24 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
     public class getStatArmsOn extends SequentialCommandGroup{
         public getStatArmsOn(WinchSubsystem r, WinchSubsystem l){
             addCommands(
+                
                 new MotionMagicCommand(Linear.min, l, 15, 30),
-                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(89), r, 10, 30),
+                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(92), r, 10, 30),
+                new WaitUntilCommand(() -> arms()),
                 new MotionMagicCommand(6, l, 10, 30)
             );
         }
+    }
+
+    public boolean arms(){
+        return pigeon.getPitch()<16;
     }
 
     public class getStatArmsOn2 extends SequentialCommandGroup{
         public getStatArmsOn2(WinchSubsystem r, WinchSubsystem l){
             addCommands(
                 new MotionMagicCommand(Linear.min, l, 15, 30),
-                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(89), r, 10, 30),
+                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(92), r, 10, 30),
                 new MotionMagicCommand(2, l, 15, 30)
             );
         }
@@ -106,14 +114,14 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
         public angleExtendAndGetOnBar(WinchSubsystem r, WinchSubsystem l){
             addCommands(
                 new ParallelCommandGroup(
-                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(120), r, 15, 30),
-                    new MotionMagicCommand(Linear.max-1, l, 25, 60)
+                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(110), r, 15, 30),
+                    new MotionMagicCommand(Linear.max-1, l, 25, 45)
                 ),
                 new WaitUntilCommand(() -> atMid()),
-                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(100), r, 15, 45),
+                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(94), r, 15, 45),
                 new MotionMagicCommand(24, l, 15, 30),
                 new WaitUntilCommand(() -> go()),
-                new MotionMagicCommand(14, l, 15, 40)
+                new MotionMagicCommand(8, l, 25, 60)
             );
         }
     }
@@ -128,7 +136,7 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
         currentPitch = pigeon.getPitch();
         previousPitch = temp;
 
-        if ((currentPitch-previousPitch) < 0 && currentPitch < 15){
+        if ((currentPitch-previousPitch) < 0 && currentPitch < Rotation.hangDegrees){
             resetVals();
             return true;
         }
@@ -147,7 +155,7 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
         temp = currentPitch;
         currentPitch = pigeon.getPitch();
         previousPitch = temp;
-        if ((currentPitch-previousPitch) > 0 && currentPitch > 15){
+        if ((currentPitch-previousPitch) > 0 && currentPitch > Rotation.hangDegrees){
             resetVals();
             return true;
         }
