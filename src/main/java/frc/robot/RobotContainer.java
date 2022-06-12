@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 //import frc.robot.commands.HangWait;
 import frc.robot.commands.MotionMagicAutoClimb;
 import frc.robot.commands.MotionMagicCommand;
+import frc.robot.commands.MotionMagicCommandHang;
 import frc.robot.commands.AutoDrive;
 import frc.robot.commands.Callibrate;
 import frc.robot.commands.DriveCommand;
@@ -45,6 +46,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
+import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.sensors.PigeonIMU;
 
@@ -82,12 +84,14 @@ public class RobotContainer {
         //rotationalWinchSubsystem.callibrate(RotationalWinchUtil.findRotationalWinchPos(90));
 
         //create and set default drive command
-        driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1)*-1, () -> joystick.getRawAxis(0), driveSubsystem)); 
-        //create forward and backward rotational winch command
+        driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1)*-1 * 0.25, () -> joystick.getRawAxis(0), driveSubsystem)); 
+        linearWinchSubsystem.setDefaultCommand(new MotionMagicCommandHang(() -> linearWinchSubsystem.getleftPostition(), linearWinchSubsystem, 0, 0));
+                //create forward and backward rotational winch command
         initButton(); 
         initChooser();
         initCam();
     }
+ 
     
     public Command getAutoCommand(){
         return new SequentialCommandGroup(
@@ -100,9 +104,10 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 new WinchCommand(Rotation.power, RotationalWinchUtil.findRotationalWinchPos(90), rotationalWinchSubsystem),
                 new AutoDrive(.2, (9*12), driveSubsystem), 
-                new WinchCommand(Linear.power*2, 0, linearWinchSubsystem),
-                new IntakeCommand(-1, intakeLinearSubsystem) 
-            )
+                new WinchCommand(Linear.power*2, 0, linearWinchSubsystem)
+            ),
+            //new AutoDrive(.5, (2*12), driveSubsystem), 
+            new AutoDrive(.7, -42, driveSubsystem)
         );
         
     }

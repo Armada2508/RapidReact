@@ -32,7 +32,7 @@ public class Constants {
     public static final class Linear {
         public static final int leftID = 4; 
         public static final int rightID = 5; 
-        public static final double power = .3;
+        public static final double power = .5;
         public static final double max = 27;
         public static final double min = 0;
         public static final double nearBar = max-5;                                 

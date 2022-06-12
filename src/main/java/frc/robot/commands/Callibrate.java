@@ -17,7 +17,6 @@ public class Callibrate extends CommandBase {
         this.b = b;
         this.subsystem = subsystem;
         this.val = val;
-
     }
 
     @Override

@@ -8,6 +8,7 @@ import frc.robot.Lib.RotationalWinchUtil;
 import frc.robot.Constants.Linear;
 import frc.robot.Constants.Rotation;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 //import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.Command;
 //import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -24,12 +25,14 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
     Command x;
     WinchSubsystem l;
     WinchSubsystem r;
+    Command hang;
 
 
     public MotionMagicAutoClimb(WinchSubsystem linear, WinchSubsystem rotation){
         pigeon = new PigeonIMU(8);
         l = linear;
         r = rotation;
+        hang = new MotionMagicCommandHang(()-> linear.getleftPostition(), linear, 0, 0);
         addCommands(    
             new firstRung(rotation, linear),
             new nextRung(rotation, linear),
@@ -77,7 +80,10 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
             addCommands(
                 new SequentialCommandGroup(
                     new MotionMagicCommand(8, l, 15, 20),
-                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(72), r, 4, 4),
+                    new ParallelRaceGroup(
+                        new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(72), r, 4, 4),
+                        new MotionMagicCommandHang(()-> l.getleftPostition(), l, 0, 0)
+                    ),
                     new MotionMagicCommand(Linear.min, l, 15, 20)
                 )
             );
@@ -87,10 +93,16 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
     public class getStatArmsOn extends SequentialCommandGroup{
         public getStatArmsOn(WinchSubsystem r, WinchSubsystem l){
             addCommands(
-                
                 new MotionMagicCommand(Linear.min, l, 15, 30),
-                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(92), r, 10, 30),
-                new WaitUntilCommand(() -> arms()),
+                new ParallelRaceGroup(
+                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(92), r, 10, 30),
+                    new MotionMagicCommandHang(()-> l.getleftPostition(), l, 0, 0)
+
+                ),
+                new ParallelRaceGroup(
+                    new WaitUntilCommand(() -> arms()),
+                    new MotionMagicCommandHang(()-> l.getleftPostition(), l, 0, 0)
+                ),
                 new MotionMagicCommand(6, l, 10, 30)
             );
         }
@@ -104,7 +116,10 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
         public getStatArmsOn2(WinchSubsystem r, WinchSubsystem l){
             addCommands(
                 new MotionMagicCommand(Linear.min, l, 15, 30),
-                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(92), r, 10, 30),
+                new ParallelRaceGroup(
+                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(92), r, 10, 30),
+                    new MotionMagicCommandHang(()-> l.getleftPostition(), l, 0, 0)
+                ),
                 new MotionMagicCommand(2, l, 15, 30)
             );
         }
@@ -117,10 +132,19 @@ public class MotionMagicAutoClimb extends SequentialCommandGroup{
                     new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(110), r, 15, 30),
                     new MotionMagicCommand(Linear.max-1, l, 25, 45)
                 ),
-                new WaitUntilCommand(() -> atMid()),
-                new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(94), r, 15, 45),
+                new ParallelRaceGroup(
+                    new WaitUntilCommand(() -> atMid()),
+                    new MotionMagicCommandHang(()-> l.getleftPostition(), l, 0, 0)
+                ),
+                new ParallelRaceGroup(
+                    new MotionMagicCommand(RotationalWinchUtil.findRotationalWinchPos(94), r, 15, 45),
+                    new MotionMagicCommandHang(()-> l.getleftPostition(), l, 0, 0)
+                ),
                 new MotionMagicCommand(24, l, 15, 30),
-                new WaitUntilCommand(() -> go()),
+                new ParallelRaceGroup(
+                    new WaitUntilCommand(() -> go()),
+                    new MotionMagicCommandHang(()-> l.getleftPostition(), l, 0, 0)
+                ),
                 new MotionMagicCommand(8, l, 25, 60)
             );
         }
