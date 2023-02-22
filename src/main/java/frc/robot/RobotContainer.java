@@ -84,7 +84,7 @@ public class RobotContainer {
         //rotationalWinchSubsystem.callibrate(RotationalWinchUtil.findRotationalWinchPos(90));
 
         //create and set default drive command
-        driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1)*-1 * 0.25, () -> joystick.getRawAxis(0), driveSubsystem)); 
+        driveSubsystem.setDefaultCommand(new DriveCommand(() -> joystick.getRawAxis(1)*-1, () -> joystick.getRawAxis(0), driveSubsystem)); 
         linearWinchSubsystem.setDefaultCommand(new MotionMagicCommandHang(() -> linearWinchSubsystem.getleftPostition(), linearWinchSubsystem, 0, 0));
                 //create forward and backward rotational winch command
         initButton(); 
